@@ -5,7 +5,7 @@
 # Traefik rawdata: http://localhost:8080/api/rawdata
 #
 # Start two instances of whoami: sudo docker-compose -f whoami_traefik.yml up --scale whoami=2
-# Check it: curl -H Host:whoami.docker.localhost http://127.0.0
+# Check it: curl -H Host:whoami.docker.localhost http://127.0.0.1
 #
 # Access whoami via browser: http://whoami.docker.localhost/
 
