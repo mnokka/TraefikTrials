@@ -1,0 +1,55 @@
+# mika.nokka1@gmail.com 8.10.2020 Hämeenlinna
+# Starting:  sudo docker-compose -f whoami_https.yml up
+
+#
+# Does HTTPS connection OK with Lets Encrypt
+#
+
+# http://localhost:8088/api/rawdata to see Traefik's API rawdata
+# whoami.docker.localhost for whoami prompt (admin,catsayscat)
+# curl -H Host:whoami.docker.localhost http://127.0.0.1 for whoami prompt
+# See app.py code for alla available options
+#
+# Traefik dashboard (if insecure mode on ):
+# http://localhost:8088/dashboard/
+# Traefik dashboard
+# http://traefik.docker.localhost/dashboard/
+#
+# Access via browser: https://sala.docker.localhost
+
+version: "3.3"
+
+services:
+
+  traefik:
+    image: "traefik:v2.4"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      #- "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myresolver.acme.email=mika.nokka1@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  whoami:
+    image: containous/whoami:v1.3.0
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`sala.docker.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
