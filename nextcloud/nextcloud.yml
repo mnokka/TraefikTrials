@@ -1,0 +1,32 @@
+# https://doc.traefik.io/traefik/getting-started/quick-start/
+# mika.nokka1@gmail.com 8.10.2020 Hämeenlinna
+#
+# TBD
+#
+# Volumes host directories must be created manually first , definitions in .env file
+# ./acme.json must be created first manually + chmod 600 rights set
+
+
+version: '3'
+
+networks:
+   nextweb: 
+     external: false
+   extweb:
+    external: true
+    
+
+
+services:
+
+ 
+  redis:
+    image: redis:latest
+    volumes:
+      - ${DIR_REDIS}:/data
+    ports:
+      - "6379:6379"
+    environment:
+     - REDIS_REPLICATION_MODE=master
+    networks:
+      - nextweb
