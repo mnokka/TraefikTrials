@@ -60,13 +60,15 @@ create_networks:
 		echo "Docker extweb exists , done nothing"; \
     fi
 
+clean:
+	$(call cleaning,redis)
 
 
-db: $(YMLFILE) 
+db: $(FILE_YMLFILE) 
 	$(call composeit,db)
 	touch db
 
-redis: $(YMLFILE) 
+redis: $(FILE_YMLFILE) 
 	$(call composeit,redis)
 	touch redis
 
@@ -77,6 +79,15 @@ nextcloud: $(YMLFILE)
 reverse-proxy: $(YMLFILE)
 	$(call composeit,reverse-proxy)
 	touch reverse-proxy	
+
+
+define cleaning
+	@echo ===============================================================================================
+	@echo Cleaning: $(1)
+	@if [ -f $(1) ]; then rm $(1) && echo Cleaned; \
+	else echo No cleaning required; \
+	fi
+endef
 
 
 #paremeter=name of the image to be booted up
@@ -92,5 +103,11 @@ define prints
 	@echo #nothing
 endef 
 
-
+#paremeter=name of the image to be booted up
+define composeit
+	@echo ===============================================================================================
+	@echo SETTING UP DOCKERIMAGE: $(1)
+	@echo 	
+	docker-compose -f $(FILE_YMLFILE) up -d $(1)
+endef
 
