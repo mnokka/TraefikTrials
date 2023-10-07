@@ -3,8 +3,8 @@
 #
 # TBD
 #
-# Volumes host directories must be created manually first , definitions in .env file
-# ./acme.json must be created first manually + chmod 600 rights set
+# Volumes host directories must be created first , definitions in .env file
+# ./acme.json must be created first + chmod 600 rights set  
 
 
 version: '3'
@@ -19,6 +19,65 @@ networks:
 
 services:
 
+
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: "traefik:v2.10.3"
+    # Enables the web UI and tells Traefik to listen to docker
+    # unsecure mode for dev in use
+    command:
+      # not in prod, dashboard
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--providers.docker=true"
+      - "--api=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpChallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=mika.nokka1@gmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      
+    ports:
+      - "80:80"
+      - "443:443"
+      #not in prod:
+      - "8080:8080" 
+
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${FILE_ACMEFILE}:/letsencrypt/acme.json"
+
+    labels:
+      
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.docker.localhost`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      
+      - "traefik.http.routers.reverse-proxy.tls=true"
+      - "traefik.http.routers.reverse-proxy-https.tls.certresolver=letsencrypt"
+
+      #- "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)
+      #- traefik.http.routers.to-https.entrypoints=http
+      - traefik.http.routers.to-https.middlewares=to-https
+      - "traefik.http.routers.reverse-proxy.rule=Host(`traefik.docker.local`)"
+
+      - traefik.http.routers.reverse-proxy.entrypoints=https
+  # - traefik.http.routers.reverse-proxy.middlewares=auth
+
+
+      # Uncomment to fetch Let's Encrypt certificates.
+      # Make sure you set up DNS records and they point to your IP.
+      
+      - traefik.http.middlewares.to-https.redirectscheme.scheme=https
+
+    networks:
+      - nextweb
+      - extweb
  
   redis:
     image: redis:latest
@@ -30,3 +89,50 @@ services:
      - REDIS_REPLICATION_MODE=master
     networks:
       - nextweb
+
+  # db is nextcloud first screen db name 
+  db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - ${DIR_DB}:/var/lib/mysql
+   
+    #usernames and passwors to be used in nextcloud first installation screen
+    #see .db_pwds
+    env_file:
+      .db_pwds
+    networks:
+      - nextweb
+      - extweb
+
+  nextcloud:
+    image: nextcloud
+    ports:
+      - 9090:80
+    depends_on:
+      - db
+      - redis
+      - reverse-proxy
+    links:
+      - db
+    environment:
+      - REDIS_HOST=redis
+    volumes:
+      #/var/www/html/data is nextcloud first screen data area offered in setup
+      - ${DIR_NEXTCLOUD}:/var/www/html  
+    labels: 
+      - "traefik.enable=true"
+      #- "traefik.http.routers.nextcloud.rule=Host(`nextcloud.docker.localhost`)"
+      - "traefik.http.routers.https.rule=Host(`next.docker.localhost`)"
+      - traefik.http.routers.https.entrypoints=websecure
+      - traefik.http.routers.https.tls=true
+      #- "traefik.http.routers.nextcloud.tls.certresolver=myhttpchallenge"
+       #- "traefik.docker.network=extweb"
+      - traefik.http.routers.reverse-proxy-https.tls.certresolver=letsencrypt
+      
+    restart: always  
+    networks:
+      - nextweb
+      - extweb
+        

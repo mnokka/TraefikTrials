@@ -43,6 +43,7 @@ test:
 	
 create_volumes:
 	@./create_volumes.sh
+	@chmod 600 $(FILE_ACMEFILE)
 
 create_networks:
 	@if ! docker network inspect nextweb >/dev/null 2>&1; then \
