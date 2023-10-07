@@ -1,10 +1,9 @@
 # Author: mika.nokka1@gmail.com  Dec, 2020:
 #
 # usage: make all -> build(everytime) and run 
-# usage: make log --> fetch every images docker logs
 # usage: make -B --> force build everything 
 #
-# include host volumes defitions (used also in .yml file)
+# include host volumes defitions: .env  (used also in .yml file)
 # contant logging: sudo docker logs 67692e6f94b7  --follow
 
 
