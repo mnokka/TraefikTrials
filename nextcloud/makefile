@@ -33,7 +33,7 @@ volumes_checker:
 	if test -f $(STOPFLAG);then echo ERROR.Stopping.Create missing volumes directories && rm $(STOPFLAG) && python3 failer.py ;else echo No problmes, carry on building;fi
 
 
-all: create_volumes volumes_checker create_networks redis 
+all: create_volumes volumes_checker create_networks startall
 
 .PHONY: test
 
@@ -95,8 +95,16 @@ define startdocker
 	@echo ===============================================================================================
 	@echo SETTING UP DOCKERIMAGE: $(1)
 	@echo 	
-	sudo docker-compose -f $(YMLFILE) up -d $(1)
+	sudo docker-compose -f $(FILE_YMLFILE) up -d $(1)
 endef
+
+startall:
+	@echo ===============================================================================================
+	@echo SETTING UP DOCKERIMAGE: $(1)
+	@echo 	
+	sudo docker-compose -f $(FILE_YMLFILE) up
+
+
 
 define prints 
 	@echo 'ENV VARIABLE: $(eval($(1))) == $($(1))'

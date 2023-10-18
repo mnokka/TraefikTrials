@@ -10,28 +10,37 @@ Traefik dashboard:  http://localhost:8080
 
 
 ### Whoami, HTTPS, password authetication
+TBD
 
+<br><br>
 
-Starting:  sudo docker-compose -f whoami_https_password.yml up
+### Nextcloud, internet usage via duckdns.org
 
-Access via browser: https://sala.docker.localhost, will ask password (admin/cat)
+*under constructions!!*
 
-.env file defines account and passord (md5 hashed)
+Uses duckdns.org to provide Nextcloud "internet handle", see .env file
 
+Defines also local name for Nextcloud in case duckdns is down, see .yml file (nextcloud labels)
+<br>
+<br>
 
-# Nextcloud, redis, db, traefik (proxy)
-### in nextcloud directory:
+Duckdns defines "host name" ,like abc.duckdns.org and passes it to your public IP (they prodive IP update scripts)
+<br>
+Router needs to bypass ports 80 and 443 to your server (using fixed IP) hosting Nextcloud 
+<br>
+Traefik passess data to Nextcloud
+<br>
 
-under constructions!!
+Works ok with web browsers (ubuntu/mint)
+<br>
+<br>
 
 make --> build containers, create networks, start system
 
 make clean -->  clean build contents
 
 
-Docker used volumes defined in .env:
-
-Database auth info defined: .db_pwds 
+.env file for defines
 
 
 
