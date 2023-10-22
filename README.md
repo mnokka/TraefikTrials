@@ -53,3 +53,14 @@ or start system after first make run --> docker-compose -f nextcloud3.yml up
 .env file for defines (volumes, DDNS name, Let's Encrypt acme file)
 
 Note: Collabora (NextCloud office) has been coomented out from yml-file as it did not open office files
+
+
+### Booting solutions
+
+1) Sometimes Nextcloud config/config.php is not generated (into defined volumes) -> remove all from volumes and rebuild containers again
+
+2) config/config.hp includes trusted domain settings (in example XXX.duckdns.org must be defined in order access to succeed from web). Sometimes is ok/not ok defined  in first boot
+
+3) Check router static IP definition / (MAC setting) / linux static IP setting
+
+4) .yml file defined "db" should be in config/config.php as database name. If you use insted docker internal IP, db shoud be booted first and and new internal ip (docker inspect) inserted to config.php before bootin nextcloud up)
