@@ -1,11 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Includes assistance from OpenAI's GPT-3.5 model ( https://openai.com/ )
 #
 # Creates directories (prefix DIR_) and files (FILE_) from docker_compose .env file
 # Directories used as Docker volumes
 
+
+
 env_file=".env"
 echo "Using env definition file: $env_file"
+
+
 
 # Check if the .env file exists
 if [ -f "$env_file" ]; then

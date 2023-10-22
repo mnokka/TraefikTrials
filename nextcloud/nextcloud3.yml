@@ -113,7 +113,7 @@ services:
       - extweb
 
   nextcloud:
-    image: nextcloud
+    image: nextcloud:27.1.2
     ports:
       - 9090:80
     depends_on:
@@ -130,7 +130,7 @@ services:
     labels: 
       - "traefik.enable=true"
       #one local name (can log in in case ddns is down) , one via dynamic dns (like duckdns.org)
-      - "traefik.http.routers.https.rule=Host(${DDNS_HOST_NAME}) ||Host(`next.docker.localhost`)"
+      - "traefik.http.routers.https.rule=Host(`${DDNS_HOST_NAME}`) ||Host(`next.docker.localhost`)"
       - traefik.http.routers.https.entrypoints=websecure
       - traefik.http.routers.https.tls=true
       #- "traefik.http.routers.nextcloud.tls.certresolver=myhttpchallenge"
