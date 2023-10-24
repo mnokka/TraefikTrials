@@ -64,3 +64,10 @@ Note: Collabora (NextCloud office) has been coomented out from yml-file as it di
 3) Check router static IP definition / (MAC setting) / linux static IP setting
 
 4) .yml file defined "db" should be in config/config.php as database name. If you use insted docker internal IP, db shoud be booted first and and new internal ip (docker inspect) inserted to config.php before bootin nextcloud up)
+
+<br>
+
+## Fresh RSS
+
+in freshrss directory : make --> build containers, create networks, start system
+Access via browser UI: rss.docker.localhost
