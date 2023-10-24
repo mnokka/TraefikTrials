@@ -45,16 +45,24 @@ services:
       - "traefik.http.routers.reverse-proxy.tls=true"
       - "traefik.http.routers.reverse-proxy-https.tls.certresolver=letsencrypt"
 
-      - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)
+      #- "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}
+      #- traefik.http.routers.to-https.entrypoints=http
       - traefik.http.routers.to-https.middlewares=to-https
       - "traefik.http.routers.reverse-proxy.rule=Host(`traefik.docker.local`)"
 
       - traefik.http.routers.reverse-proxy.entrypoints=https
+      # - traefik.http.routers.reverse-proxy.middlewares=auth
+
+
+      # Uncomment to fetch Let's Encrypt certificates.
+      # Make sure you set up DNS records and they point to your IP.
+      
       - traefik.http.middlewares.to-https.redirectscheme.scheme=https
 
     networks:
       - nextweb
-
+      - extweb
 
   freshrss:
     image: lscr.io/linuxserver/freshrss:1.21.0
@@ -71,11 +79,15 @@ services:
     labels:
        - "traefik.enable=true"
        - "traefik.docker.network=nextweb"
-       - "traefik.http.routers.freshrss.rule=Host(`rss.docker.localhost`)"
-       #- "traefik.http.routers.https.rule=Host(`${RSS_HOST_NAME}`) ||Host(`rss.docker.localhost`)"
-       - "traefik.http.routers.freshrss.entrypoints=web"
+       - "traefik.http.routers.https.rule=Host(`${RSS_HOST_NAME}`) ||Host(`rss.docker.localhost`)"
+       #- "traefik.http.routers.freshrss.entrypoints=web"
+       #- "traefik.http.middlewares.freshrss-https-redirect.redirectscheme.scheme=https"
+       #- "traefik.http.routers.freshrss.middlewares=freshrss-https-redirect"
+       - "traefik.http.routers.freshrss-secure.entrypoints=websecure"
+       - "traefik.http.routers.freshrss-secure.tls=true"
+       - "traefik.http.routers.freshrss-secure.tls.certresolver=letsencrypt" 
 
     networks:
        - nextweb
     
-    restart: unless-stopped
+    restart: unless-stopped    
