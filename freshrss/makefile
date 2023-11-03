@@ -102,7 +102,7 @@ startall:
 	@echo ===============================================================================================
 	@echo SETTING UP DOCKERIMAGE: $(1)
 	@echo 	
-	sudo docker-compose -f $(FILE_YMLFILE) up
+	docker-compose -f $(FILE_YMLFILE) up
 
 
 

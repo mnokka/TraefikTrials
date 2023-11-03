@@ -71,3 +71,11 @@ Note: Collabora (NextCloud office) has been coomented out from yml-file as it di
 
 in freshrss directory : make --> build containers, create networks, start system
 Access via browser UI: rss.docker.localhost
+
+If using duckdns.org, set your hostnames in .env (like MYHOST.duckdns.org)
+
+(This requires forwarding 80/443 ports in your router for fixed IP server running this service)
+
+<br>
+Include also single web page service, just POCcing how to provide web pabe from own server.
+

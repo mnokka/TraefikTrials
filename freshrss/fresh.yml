@@ -53,6 +53,7 @@ services:
       - traefik.http.routers.reverse-proxy.entrypoints=https
       - traefik.http.middlewares.to-https.redirectscheme.scheme=https
 
+   
     networks:
       - nextweb
 
@@ -73,23 +74,37 @@ services:
     labels:
        - "traefik.enable=true"
        - "traefik.docker.network=nextweb"
-       - "traefik.http.routers.freshrss.rule=Host(`rss.docker.localhost`)"
-       #- "traefik.http.routers.https.rule=Host(`${RSS_HOST_NAME}`) ||Host(`rss.docker.localhost`)"
+       #- "traefik.http.routers.freshrss.rule=Host(`rss.docker.localhost`)"
+       #- "traefik.http.routers.https.rule=Host(`${RSS_HOST_NAME}`) || Host(`rss.docker.localhost`)"
+       - "traefik.http.routers.freshrss.rule=Host(`${RSS_HOST_NAME}`) || Host(`rss.docker.localhost`)"
        - "traefik.http.routers.freshrss.entrypoints=web"
-
+    restart: unless-stopped
     networks:
        - nextweb
     
-    restart: unless-stopped
+   
 
-  whoami:
-    image: containous/whoami:v1.3.0
-    container_name: "simple-service"
+  single_webpage_server:
+    image: mypage:latest
+    ports:
+     - 8000:8000
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`sala.docker.localhost`)"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+      #- "traefik.http.routers.single_webpage_server.rule=Host(`ownpage.docker.localhost`)"
+      - "traefik.http.routers.https.rule=Host(`${PAGE_HOST_NAME}`) || Host(`ownpage.docker.localhost`)"
+      - "traefik.http.routers.single_webpage_server.entrypoints=web"  # Ensure it points to the correct entrypoint
       - "traefik.docker.network=nextweb"
+    restart: unless-stopped
     networks:
-       - nextweb
+      - nextweb
+
+  #whoami:
+  #  image: containous/whoami:v1.3.0
+  #  labels:
+  #    - "traefik.enable=true"
+  #    - "traefik.http.routers.whoami.rule=Host(`sala.docker.localhost`)"
+  #    - "traefik.http.routers.whoami.entrypoints=websecure"
+  #    - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+  #    - "traefik.docker.network=nextweb"
+  #  networks:
+  #    - nextweb
