@@ -26,7 +26,10 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.letsencrypt.acme.email=mika.nokka1@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      
+
+    environment:
+      - DUCKDNS_TOKEN=eafa0f46-bc01-4df9-98c9-ddcad7c17ef1
+
     ports:
       - "80:80"
       - "443:443"
@@ -84,6 +87,7 @@ services:
     
    
 
+# build first from: https://github.com/mnokka/single_webpage_server
   single_webpage_server:
     image: mypage:latest
     ports:

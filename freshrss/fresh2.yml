@@ -1,0 +1,80 @@
+version: '3'
+
+networks:
+   nextweb: 
+     external: false
+   extweb:
+    external: true
+
+services:
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: "traefik:v2.10.3"
+    # Enables the web UI and tells Traefik to listen to docker
+    # unsecure mode for dev in use
+    command:
+      # not in prod, dashboard
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
+      - "--entrypoints.websecure.http.tls.certResolver=myresolver"
+      - "--entrypoints.websecure.http.tls.domains[0].main=duckdns.org"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.duckdns.org"
+      
+      - "--certificatesresolvers.myresolver.acme.email=mika.nokka1@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
+
+    ports:
+      - "80:80"
+      - "443:443"
+    
+    environment:
+      - DUCKDNS_TOKEN=${TOKEN} 
+
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${FILE_ACMEFILE}:/letsencrypt/acme.json"
+
+    labels:
+      
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.docker.localhost`)"
+      - "traefik.http.routers.dashboard.service=api@internal"  
+    networks:
+      - nextweb
+
+    restart: unless-stopped
+
+  freshrss:
+    image: lscr.io/linuxserver/freshrss:1.21.0
+    container_name: freshrss
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ${DIR_FRESHRSS}:/config
+    ports:
+     - 81:80
+
+    labels:
+       - "traefik.enable=true"
+       - "traefik.http.routers.freshrss.rule=Host(`${RSS_HOST_NAME}`) || Host(`rss.docker.localhost`)"
+       - "traefik.http.routers.freshrss.entrypoints=web"
+       - "traefik.http.routers.freshrss.entrypoints=websecure"
+       - "traefik.docker.network=nextweb"
+       - "traefik.http.routers.freshrss.tls=true"
+    restart: unless-stopped
+    networks:
+       - nextweb
+    
+   
+
